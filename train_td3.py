@@ -1,20 +1,6 @@
 """
-TD3 training script for EVChargingEnv (DSCD 614, Option TD3-1).
-
-Runs one seeded training run and writes:
-  - logs/td3_seed{N}_episodes.csv   (episode-level reward + length, for
-                                      plotting mean/spread across seeds)
-  - models/td3_seed{N}.zip          (the trained policy)
-
-Run once per seed for the required protocol, e.g.:
-    python train_td3.py --data ev_charging_dataset.csv --seed 0 --timesteps 100000
-    python train_td3.py --data ev_charging_dataset.csv --seed 1 --timesteps 100000
-    python train_td3.py --data ev_charging_dataset.csv --seed 2 --timesteps 100000
-
-Hyperparameters below are Stable-Baselines3 TD3 defaults plus a modest
-exploration noise -- a starting point, not a tuned final configuration.
-Document any value you change from these defaults, per the exam's
-requirement to state every hyperparameter that differs from library default.
+Seeded TD3 Training Script for EVChargingEnv.
+Writes episode logs to logs/ and model checkpoints to models/.
 """
 
 import argparse
@@ -35,24 +21,35 @@ def train(data_path, seed, total_timesteps, out_dir="."):
     os.makedirs(log_dir, exist_ok=True)
     os.makedirs(model_dir, exist_ok=True)
 
-    env = Monitor(EVChargingEnv(data_path, seed=seed, split="train"))
+    raw_env = EVChargingEnv(data_path, seed=seed, split="train")
+    env = Monitor(raw_env)
 
+    # 10% gaussian noise on unit action space [0.0, 1.0]
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(
-        mean=np.zeros(n_actions), sigma=0.1 * env.action_space.high
+        mean=np.zeros(n_actions),
+        sigma=0.10 * np.ones(n_actions, dtype=np.float32),
     )
 
     model = TD3(
         "MlpPolicy",
         env,
         action_noise=action_noise,
+        learning_rate=1e-3,
+        buffer_size=200_000,
+        learning_starts=5_000,
+        batch_size=256,
+        tau=0.005,
+        gamma=0.99,
         seed=seed,
         verbose=1,
     )
 
+    print(f"\n--- Starting TD3 Training (Seed {seed}) for {total_timesteps} steps ---")
     model.learn(total_timesteps=total_timesteps, log_interval=50)
 
-    model.save(os.path.join(model_dir, f"td3_seed{seed}"))
+    model_path = os.path.join(model_dir, f"td3_seed{seed}")
+    model.save(model_path)
 
     rewards = env.get_episode_rewards()
     lengths = env.get_episode_lengths()
@@ -63,13 +60,12 @@ def train(data_path, seed, total_timesteps, out_dir="."):
         for i, (r, l) in enumerate(zip(rewards, lengths)):
             writer.writerow([i, r, l])
 
-    print(f"seed {seed}: {len(rewards)} episodes logged to {log_path}")
-    print(f"seed {seed}: model saved to {model_dir}/td3_seed{seed}.zip")
+    print(f"Seed {seed} finished. Logged: {log_path} | Saved: {model_path}.zip")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="/mnt/user-data/uploads/ev_charging_dataset.csv")
+    parser.add_argument("--data", default="ev_charging_dataset.csv")
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--timesteps", type=int, default=100_000)
     parser.add_argument("--out-dir", default=".")
