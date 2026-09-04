@@ -1,3 +1,12 @@
+# Implement EV charging Gymnasium environment
+
+- Load and preprocess EV charging dataset
+- Create normalized 8-dimensional observation space
+- Define continuous charging action space [0, 1]
+- Implement environment reset and state generation
+- Add reproducible environment initialization using random seeds
+- Validate environment initialization and observation bounds
+
  # EV Charging Optimization using TD3
  ## Project Overview
 
@@ -195,3 +204,62 @@ However, target fulfilment decreased from **100% to 62%**.
 Therefore, the learned policy demonstrates a meaningful cost/grid-efficiency trade-off but requires further reward tuning to improve charging-service reliability.
 
 ---
+
+## Results Visualizations
+
+### Training convergence
+
+`learning_curves.png` shows the TD3 training reward across the three seeds.
+
+### Baseline vs TD3
+
+`metrics_comparison.png` compares:
+
+- cumulative reward
+- peak contribution
+- charging cost
+- target fulfilment
+
+---
+
+## Known Limitations
+
+The current environment is a simplified representation of EV charging.
+
+The main limitations are:
+
+- manually selected reward weights
+- incomplete target fulfilment by the learned policy
+- simplified station dynamics
+- limited number of random seeds
+- no full multi-EV charger interaction model
+
+These limitations provide directions for future work.
+
+---
+
+## Team Contributions
+
+Each member contributed to the implementation, experimentation, documentation and final presentation.
+
+The Git history provides a record of individual contributions.
+
+Each team member also made a direct contribution to this README.
+
+---
+
+## Reproducibility
+
+Install the required packages:
+
+```bash
+pip install "stable-baselines3[extra]" gymnasium pandas numpy matplotlib
+```
+
+Then validate, train, evaluate and generate plots using the scripts provided in this repository.
+
+---
+
+## License
+
+This repository was developed as an academic project for coursework purposes.
