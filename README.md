@@ -1,5 +1,5 @@
-##EV Charging Optimization using TD3
-#Project Overview
+ # EV Charging Optimization using TD3
+ ## Project Overview
 
 This project applies Twin Delayed Deep Deterministic Policy Gradient (TD3) to the problem of electric vehicle (EV) charging optimization.
 
@@ -12,7 +12,7 @@ physical charging constraints
 
 The project uses a custom Gymnasium environment and the Stable-Baselines3 TD3 implementation.
 
-#Dataset
+# Dataset
 
 The project uses an EV charging dataset containing charging-session information such as:
 
@@ -50,13 +50,13 @@ Project Structure
     ├── td3_seed0_episodes.csv
     ├── td3_seed1_episodes.csv
     └── td3_seed2_episodes.csv
-#Environment
+# Environment
 
 ev_charging_env.py implements the custom Gymnasium environment.
 
 implements the custom Gymnasium environment.
 
-#Observation
+# Observation
 
 The environment uses six normalized state variables:
 
@@ -67,7 +67,7 @@ The environment uses six normalized state variables:
 5. Background charging demand
 6. Vehicle power-limit fraction
 
-#Action
+# Action
 
 The agent produces a continuous normalized charging action:
 
@@ -78,7 +78,7 @@ The physical charging power is:
 
 actual_power = action × vehicle_power_limit
 
-#Reward
+# Reward
 
 The reward combines:
 
@@ -90,7 +90,7 @@ shortfall penalties
 
 The purpose is to encourage useful charging while discouraging unnecessarily aggressive charging.
 
-Validation
+# Validation
 
 Before training, the environment is checked for:
 
